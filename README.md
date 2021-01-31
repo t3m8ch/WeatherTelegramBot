@@ -1,7 +1,7 @@
 # WeatherTelegramBot
 Telegram bot that shows the weather in the city.
 
-## Setup
+## Setup (on Unix-like systems)
 1. Clone this repository:
 ```bash
 git clone https://github.com/t3m8ch/WeatherTelegramBot.git
