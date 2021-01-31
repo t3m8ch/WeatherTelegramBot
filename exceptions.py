@@ -1,0 +1,3 @@
+class CityNotFoundError(Exception):
+    pass
+
