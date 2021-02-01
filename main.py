@@ -7,7 +7,7 @@ configure_logger(LOGGING_LEVEL)
 import asyncio
 from aiogram import Bot, Dispatcher, executor, types
 
-from exceptions import CityNotFoundError
+from exceptions import CityNotFoundError, ServerError
 from weather import OpenWeatherMap
 
 
@@ -42,6 +42,9 @@ async def send_weather(message: types.Message):
         await message.answer(text)
     except CityNotFoundError as e:
         await message.answer('Такого города нет.')
+    except ServerError as e:
+        await message.answer('Извините, произошла ошибка на нашей стороне.\n' \
+                             'Обратитесь к разработчику бота.')
 
 
 if __name__ == '__main__':

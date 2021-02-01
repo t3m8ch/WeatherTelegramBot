@@ -5,7 +5,7 @@ from loguru import logger
 
 import aiohttp
 
-from exceptions import CityNotFoundError
+from exceptions import CityNotFoundError, OWMApiKeyIsNotCorrectError
 
 
 class Wind(NamedTuple):
@@ -25,20 +25,18 @@ class Weather(NamedTuple):
         return self.pressure_hpa * 0.750062  # according to Google
 
 
-class NullWeather(Weather):
-    pass
-
-
-def get_null_weather() -> NullWeather:
-    return NullWeather('NOT FOUND', 0, 0, 0, 0, None)
-
-
 def _parse_owm_json(json) -> Weather:
-    code = json['cod']
+    code = int(json['cod'])
+    logger.debug(f'Status code = {code}')
 
-    if code != 200:
-        return get_null_weather()
+    if code == 404:
+        logger.debug(f'City not found!')
+        raise CityNotFoundError()
+    if code == 401:
+        logger.error(f'OpenWeatherMap api key is not correct!')
+        raise OWMApiKeyIsNotCorrectError()
 
+    logger.debug('OK')
     wind_json = json['wind']
     wind = Wind(speed=float(wind_json['speed']),
                 deg=int(wind_json['deg']))
@@ -79,10 +77,6 @@ class OpenWeatherMap:
 
         async with self.__aiohttp_session.get(url) as response:
             json = await response.json()
-
             parsed = _parse_owm_json(json)
-            if isinstance(parsed, NullWeather):
-                raise CityNotFoundError()
-
             return parsed
 
